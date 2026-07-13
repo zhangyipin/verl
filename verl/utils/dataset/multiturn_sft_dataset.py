@@ -70,6 +70,19 @@ def print_assembled_message(tokenizer, message_list, input_ids, loss_mask, attn_
     logger.debug(str)
 
 
+def _read_sft_data_file(data_file: str) -> pd.DataFrame:
+    file_suffix = os.path.splitext(data_file)[1].lower()
+    if file_suffix == ".jsonl":
+        return pd.read_json(data_file, lines=True)
+    if file_suffix == ".json":
+        return pd.read_json(data_file)
+    if file_suffix == ".parquet":
+        # default loader loads some list as np.ndarray, which fails the tokenizer
+        return pd.read_parquet(data_file, dtype_backend="pyarrow")
+
+    raise ValueError(f"Unsupported SFT data file format: {data_file}")
+
+
 class MultiTurnSFTDataset(Dataset):
     """
     Dataset for multi-turn conversations where each assistant response should be trained
@@ -143,8 +156,7 @@ class MultiTurnSFTDataset(Dataset):
 
         dataframes = []
         for parquet_file in self.parquet_files:
-            # default loader loads some list as np.ndarray, which fails the tokenizer
-            dataframe = pd.read_parquet(parquet_file, dtype_backend="pyarrow")
+            dataframe = _read_sft_data_file(parquet_file)
             dataframes.append(dataframe)
         self.dataframe = pd.concat(dataframes)
 

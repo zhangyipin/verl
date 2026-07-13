@@ -30,10 +30,24 @@ from transformers.utils import get_json_schema
 
 from verl.utils import hf_processor, hf_tokenizer
 from verl.utils.dataset.dataset_utils import DatasetPadMode, SFTTensorCollator
-from verl.utils.dataset.multiturn_sft_dataset import MultiTurnSFTDataset
+from verl.utils.dataset.multiturn_sft_dataset import MultiTurnSFTDataset, _read_sft_data_file
 from verl.utils.model import extract_multi_modal_inputs
 
 custom_model_prefix = Path("~/models").expanduser().resolve()
+
+
+def test_multiturn_sft_dataset_reads_jsonl(tmp_path):
+    test_file = tmp_path / "train.jsonl"
+    test_file.write_text(
+        '{"messages":[{"role":"user","content":"Hi"},{"role":"assistant","content":"Hello"}]}\n'
+        '{"messages":[{"role":"user","content":"1+1?"},{"role":"assistant","content":"2"}]}\n'
+    )
+
+    dataframe = _read_sft_data_file(str(test_file))
+
+    assert len(dataframe) == 2
+    assert dataframe.iloc[0]["messages"][0] == {"role": "user", "content": "Hi"}
+    assert dataframe.iloc[1]["messages"][1] == {"role": "assistant", "content": "2"}
 
 
 @pytest.mark.parametrize(

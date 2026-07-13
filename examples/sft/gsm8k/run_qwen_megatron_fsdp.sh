@@ -13,6 +13,18 @@ TP=${TP:-4}
 PP=${PP:-1}
 EP=${EP:-1}
 
+
+# #-----
+
+#     engine.tensor_model_parallel_size=${TP_SIZE} \
+#     engine.pipeline_model_parallel_size=${PP_SIZE} \
+#     engine.virtual_pipeline_model_parallel_size=${VPP_SIZE} \
+#     engine.context_parallel_size=${CP_SIZE} \
+#     engine.expert_model_parallel_size=${EP_SIZE} \
+#     engine.expert_tensor_parallel_size=${ETP_SIZE} \
+
+# #-----
+
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 export HYDRA_FULL_ERROR=1
 unset ROCR_VISIBLE_DEVICES
